@@ -1,0 +1,63 @@
+<template
+	data-name="type-work-item"
+	data-props="
+	  roleName,
+	  startDate,
+	  endDate,
+	  worksFor,
+	  description
+	">
+	<details>
+		<summary>
+			<span class="work-item item" role="presentation">
+        <disclosure-triangle></disclosure-triangle>
+        <span class="item-inner" role="presentation">
+          <span role="presentation" class="item-name">
+            <template
+              v-for="employer in [ worksFor ]"
+              :key="employer.name">
+              <span
+                class="work-employer-name property-name"
+                role="presentation">
+                {{ employer.name }}
+              </span>
+              <span class="separator">
+                —
+              </span>
+              <span class="work-roleName property-roleName" role="presentation">
+                {{ roleName }}
+              </span>
+            </template>
+          </span>
+          <span>
+            <template
+              v-for="employer in [ worksFor ]">
+              <span
+                class="property-dateRange"
+                role="presentation">
+                <time
+                  :datetime="startDate"
+                  class="work-startDate property-startDate">
+                  {{ startDate }}
+                </time>
+                <template v-if="startDate !== endDate">
+                  —
+                  <time
+                    :datetime="endDate || new Date().getFullYear()"
+                    class="work-endDate property-endDate">
+                    {{ endDate || 'Present' }}
+                  </time>
+                </template>
+              </span>
+            </template>
+          </span>
+        </span>
+			</span>
+		</summary>
+		<div class="work-description property-description" v-if="description">
+      <p v-for="p in description">
+        {{ p }}
+      </p>
+    </div>
+	</details>
+</template>

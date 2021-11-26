@@ -1,0 +1,35 @@
+<template
+  data-name="type-education-item"
+  data-props="
+    roleName,
+    startDate,
+    endDate,
+    alumniOf,
+    description
+  ">
+  <details>
+    <summary>
+      <span class="education-item item" role="presentation">
+        <disclosure-triangle></disclosure-triangle>
+        <span class="item-inner" role="presentation">
+          <span role="presentation" class="item-name">
+            <span class="education-institution-name property-name" role="presentation">
+              {{ alumniOf.name }}
+            </span>
+            <span class="separator">
+              —
+            </span>
+            <span class="work-roleName property-roleName" role="presentation">
+              {{ roleName }}
+            </span>
+          </span>
+        </span>
+      </span>
+    </summary>
+    <div class="education-description property-description" v-if="description">
+      <p v-for="p in description">
+        {{ p }}
+      </p>
+    </div>
+	</details>
+</template>

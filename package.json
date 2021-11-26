@@ -1,0 +1,13 @@
+{
+  "name": "pickpuck-dev",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+		"login": "firebase login",
+		"deploy": "firebase deploy"
+  },
+  "dependencies": {
+    "firebase-tools": "latest"
+  }
+}

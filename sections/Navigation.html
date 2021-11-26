@@ -1,0 +1,49 @@
+<template
+	data-name="section-navigation"
+	data-props="name,image,jobTitle,sameAs,description,email">
+  <nav class="person-sameAs property-sameAs">
+    <ul class="links-list" role="presentation">
+      <li class="link-item">
+        <a
+          class="link"
+          :href="'mailto:Michael Puckett<' + email + '>'"
+          target="_blank">
+          {{ email }}
+        </a>
+      </li><!--
+      --><!--<li class="link-item">
+        <details>
+          <summary class="link">
+            
+        <span class="item-bullet" aria-hidden="true">
+          Social
+          </button>
+          <ul class="links-list" role="menu">
+            <li
+              v-for="{ name, url } in sameAs"
+              :key="url"
+              class="link-item"
+              role="presentation">
+              <a
+                class="link"
+                :href="url"
+                role="menuitem"
+                target="_blank"
+                draggable="false">
+                {{ name }}
+              </a>
+            </li>
+          </ul>
+        </summary>
+      </details>
+      </li>
+      --><li class="link-item">
+        <a
+          class="link"
+          href="michael-puckett-resume.pdf">
+          Résumé
+        </a>
+      </li>
+    </ul>
+  </nav>
+</template>

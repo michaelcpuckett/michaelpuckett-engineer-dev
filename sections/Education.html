@@ -1,0 +1,24 @@
+<template
+  data-name="section-education"
+  data-props="alumniOf">
+		<section class="section-education">
+			<div class="sticky">
+				<h2>Education</h2>
+				<button>
+					<expansion-icon></expansion-icon>
+					<span class="visually-hidden">
+						Expand/Collapse Education Sections
+					</span>
+				</button>
+			</div>
+				<ul class="unstyled-list">
+				<li 
+					v-for="educationItem in alumniOf"
+					:key="educationItem.alumniOf.name">
+					<type-education-item
+						v-bind="educationItem">
+					</type-education-item>
+				</li>
+			</ul>
+		</section>
+</template>

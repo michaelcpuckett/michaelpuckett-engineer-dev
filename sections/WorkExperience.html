@@ -1,0 +1,29 @@
+<template
+  data-name="section-work-experience"
+  data-props="worksFor">
+	<section class="section-work-experience">
+		<div class="sticky">
+			<h2>Experience</h2>
+			<button>
+				<expansion-icon></expansion-icon>
+				<span class="visually-hidden">
+					Expand/Collapse Experience Sections
+				</span>
+			</button>
+		</div>
+		<ul class="unstyled-list">
+			<li
+				v-for="(workItem, i) in worksFor"
+				v-if="[
+					'Corporation',
+					'LocalBusiness',
+					'GovernmentOrganization'
+				].includes(workItem.worksFor.type)"
+				:key="workItem.worksFor.name">
+				<type-work-item
+					v-bind="workItem">
+				</type-work-item>
+			</li>
+		</ul>
+	</section>
+</template>

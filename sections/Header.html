@@ -1,0 +1,30 @@
+<template
+	data-name="section-header"
+	data-props="name,image,jobTitle,description,sameAs,email">
+	<header>
+		<!--<img
+			class="person-image property-image"
+			:src="image"
+			alt="Michael Puckett, UX Engineer, wearing a hat"
+			width="75"
+			height="75"
+		/>-->
+		<h1 class="primary-heading">
+			<span class="person-name property-name" role="presentation">
+				<span class="person-name-inner" role="presentation">
+					{{ name }}
+				</span>
+				<span hidden>,</span>
+			</span>
+			<span class="person-jobTitle property-jobTitle" role="presentation">
+				{{ jobTitle }}
+			</span>
+		</h1>
+		<p class="person-description property-description" v-if="description">
+			{{ description }}
+		</p>
+		<p class="person-description property-description">
+			I'm a passionate advocate of digital accessibility, and I specialize in building accessible digital products and tools.
+		</p>
+	</header>
+</template>

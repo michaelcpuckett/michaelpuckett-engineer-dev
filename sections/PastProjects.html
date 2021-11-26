@@ -1,0 +1,39 @@
+<template
+  data-name="section-past-projects"
+  data-props="worksFor">
+		<section
+      v-if="worksFor.find(workItem => ![
+        'Corporation',
+        'GovernmentOrganization'
+      ].includes(workItem.worksFor.type) || [
+        'Corporation',
+        'GovernmentOrganization'
+      ].includes(workItem.worksFor.type) && workItem.endDate < (new Date().getFullYear() - 10))"
+			class="section-past-projects">
+			<div class="sticky">
+				<h2>
+					Projects
+				</h2>
+				<button>
+					<expansion-icon></expansion-icon>
+					<span class="visually-hidden">
+						Expand/Collapse Projects Sections
+					</span>
+				</button>
+			</div>
+			<ul class="unstyled-list">
+				<li
+					v-for="workItem in worksFor"
+					v-if="![
+						'Corporation',
+						'LocalBusiness',
+						'GovernmentOrganization'
+					].includes(workItem.worksFor.type)"
+					:key="workItem.worksFor.name">
+					<type-work-item
+						v-bind="workItem">
+					</type-work-item>
+				</li>
+			</ul>
+		</section>
+	</template>
