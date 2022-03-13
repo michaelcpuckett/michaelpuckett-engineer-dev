@@ -7,6 +7,15 @@
 	"type": "Person",
 	"preferredUsername": "michael",
 	"inbox": "https://michaelpuckett.engineer/as/inbox",
+    "name": "Michael Puckett",
+    "url": "http://michaelpuckett.engineer",
+    "image": {
+        "type": "Link",
+        "href": "https://michaelpuckett.engineer/avatar.png",
+        "mediaType": "image/png",
+        "width": 300,
+        "height": 300
+    },
 	"publicKey": {
 		"id": "https://michaelpuckett.engineer/as/actor#main-key",
 		"owner": "https://michaelpuckett.engineer/as/actor",
