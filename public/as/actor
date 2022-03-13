@@ -1,0 +1,15 @@
+{
+	"@context": [
+		"https://www.w3.org/ns/activitystreams",
+		"https://w3id.org/security/v1"
+	],
+	"id": "https://michaelpuckett.engineer/as/actor",
+	"type": "Person",
+	"preferredUsername": "mpuckett",
+	"inbox": "https://michaelpuckett.engineer/as/inbox",
+	"publicKey": {
+		"id": "https://michaelpuckett.engineer/as/actor#main-key",
+		"owner": "https://michaelpuckett.engineer/as/actor",
+		"publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoVVL1IzCQRk0NvpYNHLV\ndJMOWjPKnW+8dXAdAuVTQZsm90X82Wh76S6q2LttTWflAW17pz4CzASZf9grWLKi\nj2tJ3Ys6qjvaewwwc6DjrZ3nV3zGo9bj1CcLtaonfj6zF1ZLrMY5DWcTGL28wSmo\nkX7yGF4hP8x8Uvk18T1OdawzgDgswYllfJoPu59fja8z2Rwx/wcXYdd/LbEGY2a3\ntZ2kTAtypL2qE5KveMSYOmprk/poE1s5pHibfDTc4RoSEEfkK2XH836b9SVocHSp\nYegedAxL2P67WHVJdX0HH0zQlBrMWh8713FCIuHvluc+G8kmoo/us/rcq/CtSTkj\newIDAQAB\n-----END PUBLIC KEY-----"
+	}
+}
