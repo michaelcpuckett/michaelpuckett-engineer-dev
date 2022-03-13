@@ -5,6 +5,19 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ]
+    ],
+    "headers": [{
+      "source": "public/as/actor",
+      "headers": [ {
+        "key": "Content-Type",
+        "value": "application/json"
+      }]
+    }, {
+      "source": "public/.well-known/webfinger",
+      "headers": [{
+        "key": "Content-Type",
+        "value": "application/json"
+      }]
+    }]
   }
 }
