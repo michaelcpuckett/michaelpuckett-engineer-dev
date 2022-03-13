@@ -5,7 +5,7 @@
 	],
 	"id": "https://michaelpuckett.engineer/as/actor",
 	"type": "Person",
-	"preferredUsername": "mpuckett",
+	"preferredUsername": "michael",
 	"inbox": "https://michaelpuckett.engineer/as/inbox",
 	"publicKey": {
 		"id": "https://michaelpuckett.engineer/as/actor#main-key",

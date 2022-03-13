@@ -1,0 +1,10 @@
+{
+	"subject": "acct:michael@michaelpuckett.engineer",
+	"links": [
+		{
+			"rel": "self",
+			"type": "application/activity+json",
+			"href": "https://michaelpuckett.engineer/as/actor"
+		}
+	]
+}
