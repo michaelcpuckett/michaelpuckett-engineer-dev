@@ -1,0 +1,94 @@
+tell ui (
+    load "main" (load "/movies.json")
+
+    define main (movies) [
+        application [
+            title: "Example"
+            when (loaded) [
+                view [
+                    grid [
+                        heading ["Theatrical Releases"]
+                        row (for month in movies(by "month")) [
+                            heading ["Coming " month("name")]
+                            cell (for movie in movies(month: month)) [
+                                use "movie-thumbnail"
+                            ]
+                        ]
+                    ]
+                ]
+            ] : [
+                view [
+                    object [
+                        layout: "place-self-center"
+                        animate: "spin"
+                        load "/images/spinner.svg"
+                    ]
+                ]
+            ]
+        ]
+    ]
+
+    define "movie-thumbnail" [
+        schema: (
+            type: "Movie",
+            name: item("name")
+        )
+        text [
+            style: "item"
+            item("name")
+        ]
+        object [load "/images/coming-soon/" kebab-case(item("name")) ".jpg"]
+        button [
+            style: "cta"
+            text ["Preorder Tickets"]
+            when (click) {
+                tell cart (
+                    add movie
+                )
+                tell ui (
+                    load "continue to checkout modal"
+                )
+            }
+        ]
+        when (user-type is user-types("editor")) [
+            button [
+                style: "danger"
+                object [load "/images/icon/delete.svg"]
+                text ["Delete"]
+                when (click) [
+                    tell ui (
+                        load "confirm delete movie modal" (item, items)
+                    )
+                ]
+            ]
+        ]
+    ]
+
+    
+    define "confirm delete movie modal" (item, items) [
+        dialog [
+            heading ["Are you sure you want to delete " item("name") "?"]
+            button [
+                text ["Cancel"]
+                when (click) [
+                    tell ui (
+                        focus "main"
+                        unload this
+                    )
+                ]
+            ]
+            button [
+                text ["OK"]
+                when (click) [
+                    tell items (
+                        delete item
+                    )
+                    tell ui (
+                        focus "main"
+                        unload this
+                    )
+                ]
+            ]
+        ]
+    ]
+)

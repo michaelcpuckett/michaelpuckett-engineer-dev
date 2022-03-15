@@ -6,13 +6,13 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [ {
-      "source": "public/as/inbox",
+    "rewrites": [{
+      "source": "as/inbox",
       "function": "inbox"
     }],
     "headers": [{
       "source": "public/as/actor",
-      "headers": [ {
+      "headers": [{
         "key": "Content-Type",
         "value": "application/json"
       }]
