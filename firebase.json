@@ -6,6 +6,10 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "rewrites": [ {
+      "source": "public/as/inbox",
+      "function": "inbox"
+    }],
     "headers": [{
       "source": "public/as/actor",
       "headers": [ {
