@@ -9,6 +9,9 @@
     "rewrites": [{
       "source": "as/inbox",
       "function": "as"
+    },{
+      "source": "as/outbox",
+      "function": "as"
     }, {
       "source": "as/followers",
       "function": "as"
@@ -25,7 +28,7 @@
       "source": "as/admin/create",
       "function": "as"
     }, {
-      "source": "as/admin/follow/{,/**}",
+      "source": "as/admin/follow",
       "function": "as"
     }],
     "headers": [{

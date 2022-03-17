@@ -1,3 +1,4 @@
 node_modules
 .firebase
 functions/private-key.js
+functions/firebase-config.js

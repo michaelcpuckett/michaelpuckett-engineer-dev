@@ -1,9 +1,143 @@
 <!doctype html>
 <html>
+    <head>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+            .feeds {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 40px;
+            }
+            .feed {
+                display: flex;
+                flex-direction: column;
+                gap: 40px;
+            }
+        </style>
+    </head>
     <body>
-        <form method="POST" action="/as/admin/create">
-            <textarea name="content"></textarea>
-            <button>Submit</button>
-        </form>
+        <main>
+            <h1>Welcome back.</h1>
+            <section>
+                <h2>Create a Note</h2>
+                <form method="POST" action="/as/admin/create">
+                    <textarea name="content"></textarea>
+                    <button>Submit</button>
+                </form>
+            </section>
+            <section>
+                <h2>Social Feeds</h2>
+                <div class="feeds">
+                    <div class="feed" id="inbox">
+                        <h3>Following</h3>
+                    </div>
+                    <div class="feed" id="outbox">
+                        <h3>Your Posts</h3>
+                        
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h2>Follow a User</h2>
+                <form method="POST" action="/as/admin/follow">
+                    <input type="text" name="actor">
+                    <button>Follow</button>
+                </form>
+            </section>
+        </main>
+        <script type="module">
+            ;(async () => {
+                const localActor = 'https://michaelpuckett.engineer/as/actor';
+
+                const likes = await fetch('/as/likes')
+                    .then(response => response.json())
+                    .then(data => {
+                        return data.first.orderedItems;
+                    });
+                
+                window.customElements.define('feed-item', class extends HTMLElement {
+                    constructor() {
+                        super();
+                        this.attachShadow({ mode: 'open' });
+                    }
+                    connectedCallback() {
+                        const rootDivElement = window.document.createElement('div');
+                        if (this.feedItem?.type) {
+                            rootDivElement.classList.add('feed-item');
+                            rootDivElement.classList.add(`feed-item--${this.feedItem.type}`);
+                        }
+                        rootDivElement.innerHTML = `
+                            <style>
+                                .feed-item {
+                                    border: 1px solid black;
+                                    border-radius: 8px;
+                                    padding: 12px;
+                                }
+                            </style>
+                            ${this.feedItem?.type === 'Note' ? `
+                                ${this.feedItem.attributedTo === localActor ? '' : `
+                                    <p><strong>${this.feedItem.attributedTo}</strong></p>
+                                `}
+                                <p>${this.feedItem.content}</p>
+                                ${(this.feedItem.attributedTo === localActor ? '' : ((likes.indexOf(this.feedItem.id) > -1)) ? `
+                                    <form method="POST" action="/as/admin/undo">
+                                        <input type="hidden" name="id" value="${this.feedItem.id}">
+                                        <input type="hidden" name="actor" value="${this.feedItem.attributedTo}">
+                                        <button>Undo Like</button>
+                                    </form>
+                                ` : `
+                                    <form method="POST" action="/as/admin/like">
+                                        <input type="hidden" name="id" value="${this.feedItem.id}">
+                                        <input type="hidden" name="actor" value="${this.feedItem.attributedTo}">
+                                        <button>Like</button>
+                                    </form>
+                                `)}
+                            ` : ''}
+                            ${this.feedItem?.type === 'Like' ? `
+                                ${this.feedItem.actor === localActor ? '' : `
+                                    <p><strong>${this.feedItem.actor}</strong> liked</p>
+                                `}
+                                <p>${this.feedItem.object}</p>
+                            ` : ''}
+                        `;
+                        this.shadowRoot.append(rootDivElement);
+                    }
+                });
+                const getInbox = async () => {
+                    await fetch('/as/inbox')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        const feedItems = data.first.orderedItems;
+                        const containerElement = window.document.querySelector('#inbox');
+
+                        for (const feedItem of feedItems) {
+                            const feedItemElement = window.document.createElement('feed-item');
+                            feedItemElement.feedItem = feedItem;
+                            containerElement.append(feedItemElement);
+                        }
+                    });
+                };
+                const getOutbox = async () => {
+                    await fetch('/as/outbox')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        const feedItems = data.first.orderedItems;
+                        const containerElement = window.document.querySelector('#outbox');
+
+                        for (const feedItem of feedItems) {
+                            const feedItemElement = window.document.createElement('feed-item');
+                            feedItemElement.feedItem = feedItem;
+                            containerElement.append(feedItemElement);
+                        }
+                    });
+                };
+                Promise.all([getInbox(), getOutbox()]);
+            })();
+
+        </script>
     </body>
 </html>
