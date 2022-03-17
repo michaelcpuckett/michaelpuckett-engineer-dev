@@ -8,13 +8,16 @@
     ],
     "rewrites": [{
       "source": "as/inbox",
-      "function": "inbox"
+      "function": "as"
+    }, {
+      "source": "as/followers",
+      "function": "as"
     }],
     "headers": [{
       "source": "public/as/actor",
       "headers": [{
         "key": "Content-Type",
-        "value": "application/json"
+        "value": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
       }]
     }, {
       "source": "public/.well-known/webfinger",

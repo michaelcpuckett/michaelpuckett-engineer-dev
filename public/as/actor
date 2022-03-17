@@ -7,6 +7,10 @@
 	"type": "Person",
 	"preferredUsername": "michael",
 	"inbox": "https://michaelpuckett.engineer/as/inbox",
+	"outbox": "https://michaelpuckett.engineer/as/outbox",
+	"followers": "https://michaelpuckett.engineer/as/followers",
+	"following": "https://michaelpuckett.engineer/as/following",
+	"likes": "https://michaelpuckett.engineer/as/likes",
     "name": "Michael Puckett",
     "url": "http://michaelpuckett.engineer",
     "image": {

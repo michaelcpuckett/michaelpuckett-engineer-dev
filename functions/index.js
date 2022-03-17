@@ -39,7 +39,7 @@ const signAndSendToActorInbox = async (message) => {
         method: 'post',
         body: JSON.stringify(message),
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
             'Host': foreignDomain,
             'Date': dateString,
             'Digest': `SHA-256=${digestHash}`,
@@ -68,7 +68,7 @@ const sendAcceptMessage = async (object) => {
     await signAndSendToActorInbox(message);
 };
 
-app.post('*', async (req, res) => {
+const handleInboxPostRequest = async (req, res) => {
     try {
         const data = JSON.parse(req.body.toString());
         const {
@@ -83,30 +83,49 @@ app.post('*', async (req, res) => {
 
         if (type === 'Follow' && object === localActor) {
             await sendAcceptMessage(data);
+
+            // record response
+            firebaseAdmin.database().ref(`/as/followers/${Date.now()}`).set({
+                id: actor
+            });
+
             res.status(200).send({
                 "@context": "https://www.w3.org/ns/activitystreams"
             });
         } else if (type === 'Undo') {
-            console.log('UNDO...(TODO)');
-            res.status(200).send({
-                "@context": "https://www.w3.org/ns/activitystreams"
+            firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
+                const [timestamp] = Object.entries(snapshot.val() || {}).find(([, child]) => child.id === actor);
+                firebaseAdmin.database().ref(`/as/followers/${timestamp}`).set(null);
+
+                res
+                    .setHeader('Content-Type', 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"')
+                    .status(200)
+                    .send({
+                        "@context": "https://www.w3.org/ns/activitystreams"
+                    });
             });
         } else {
             console.log('OTHER...');
-            res.status(200).send({
-                "@context": "https://www.w3.org/ns/activitystreams"
-            });
+            res
+                .setHeader('Content-Type', 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"')
+                .status(200)
+                .send({
+                    "@context": "https://www.w3.org/ns/activitystreams"
+                });
         }
     } catch (error) {
         console.log({error});
         console.log(req.body);
-        res.status(200).send({
-            "@context": "https://www.w3.org/ns/activitystreams"
-        });
+        res
+            .setHeader('Content-Type', 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"')
+            .status(200)
+            .send({
+                "@context": "https://www.w3.org/ns/activitystreams"
+            });
     }
-});
+};
 
-app.get('*', (req, res) => {
+const handleInboxGetRequest = (req, res) => {
     try {
         const data = JSON.parse(req.body.toString());
         // record request
@@ -114,9 +133,40 @@ app.get('*', (req, res) => {
     } catch (error) {
         console.log(req.body);
     }
-    res.status(200).send({
-        "@context": "https://www.w3.org/ns/activitystreams"
-    });
-});
+    
+    res
+        .setHeader('Content-Type', 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"')
+        .status(200)
+        .send({
+            "@context": "https://www.w3.org/ns/activitystreams"
+        });
+};
 
-exports.inbox = functions.https.onRequest(app);
+const handleFollowersGetRequest = (req, res) => {
+    firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
+        const followers = Object.values(snapshot.val() || {}).map(child => child.id);
+
+        res
+            .setHeader('Content-Type', 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"')
+            .status(200)
+            .send({
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "type": "OrderedCollection",
+                "totalItems": followers.length,
+                "id": `https://michaelpuckett.engineer/as/followers`,
+                "first": {
+                    "id": `https://michaelpuckett.engineer/as/followers?page=1`,
+                    "type": "OrderedCollectionPage",
+                    "totalItems": followers.length,
+                    "partOf": 'https://michaelpuckett.engineer/as/followers',
+                    "orderedItems": followers
+                }
+            });
+    });
+};
+
+app.post('/as/inbox', handleInboxPostRequest);
+app.get('/as/inbox', handleInboxGetRequest);
+app.get('/as/followers', handleFollowersGetRequest);
+
+exports.as = functions.https.onRequest(app);
