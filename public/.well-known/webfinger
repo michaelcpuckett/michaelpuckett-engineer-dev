@@ -1,6 +1,20 @@
 {
 	"subject": "acct:michael@michaelpuckett.engineer",
+	"aliases": [
+		"https://www.twitter.com/mpuckett",
+		"https://mastodon.social/users/mpuckett"
+	],
 	"links": [
+		{
+			"rel": "http://webfinger.net/rel/avatar",
+			"type": "image/png",
+			"href": "https://michaelpuckett.engineer/avatar.png"
+		},
+		{
+		  "rel": "http://webfinger.net/rel/profile-page",
+		  "type": "text/html",
+		  "href": "https://michaelpuckett.engineer"
+		},
 		{
 			"rel": "self",
 			"type": "application/activity+json",

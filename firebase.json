@@ -12,6 +12,21 @@
     }, {
       "source": "as/followers",
       "function": "as"
+    }, {
+      "source": "as/following",
+      "function": "as"
+    }, {
+      "source": "as/likes",
+      "function": "as"
+    }, {
+      "source": "as/admin/like",
+      "function": "as"
+    }, {
+      "source": "as/admin/create",
+      "function": "as"
+    }, {
+      "source": "as/admin/follow/{,/**}",
+      "function": "as"
     }],
     "headers": [{
       "source": "public/as/actor",

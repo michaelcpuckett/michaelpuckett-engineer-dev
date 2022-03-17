@@ -1,25 +1,25 @@
 {
 	"@context": [
 		"https://www.w3.org/ns/activitystreams",
-		"https://w3id.org/security/v1"
+		"https://w3id.org/security/v1",
+		{
+		  "toot": "http://joinmastodon.org/ns#",
+		  "discoverable": "toot:discoverable"
+		}
 	],
 	"id": "https://michaelpuckett.engineer/as/actor",
 	"type": "Person",
 	"preferredUsername": "michael",
+    "name": "Michael Puckett",
+	"summary": "Creative technologist with a focus on web accessibility",
+	"url": "https://michaelpuckett.engineer",
+	"icon": "https://michaelpuckett.engineer/avatar.png",
 	"inbox": "https://michaelpuckett.engineer/as/inbox",
 	"outbox": "https://michaelpuckett.engineer/as/outbox",
 	"followers": "https://michaelpuckett.engineer/as/followers",
 	"following": "https://michaelpuckett.engineer/as/following",
 	"likes": "https://michaelpuckett.engineer/as/likes",
-    "name": "Michael Puckett",
-    "url": "http://michaelpuckett.engineer",
-    "image": {
-        "type": "Link",
-        "href": "https://michaelpuckett.engineer/avatar.png",
-        "mediaType": "image/png",
-        "width": 300,
-        "height": 300
-    },
+	"discoverable": true,
 	"publicKey": {
 		"id": "https://michaelpuckett.engineer/as/actor#main-key",
 		"owner": "https://michaelpuckett.engineer/as/actor",
