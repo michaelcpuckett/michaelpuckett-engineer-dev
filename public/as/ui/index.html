@@ -198,7 +198,7 @@
                         .then(data => {
                             const feedItems = data.first.orderedItems;
                             const containerElement = window.document.querySelector('#outbox');
-                            const likesAndPosts = [...likes, ...feedItems].sort((a, b) => new Date(a.published) - new Date(b.published));
+                            const likesAndPosts = [...likes, ...feedItems].sort((a, b) => new Date(b.published) - new Date(a.published));
 
                             for (const feedItem of likesAndPosts) {
                                 const feedItemElement = window.document.createElement('feed-item');

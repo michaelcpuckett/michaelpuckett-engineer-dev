@@ -333,6 +333,10 @@ const handleLikesGetRequest = (req, res) => {
                 }
             })
             .then(response => response.json())
+            .then(object => object.error ? {
+                id: child.object,
+                type: 'Tombstone'
+            } : object)
             .catch(() => ({
                 id: child.object,
                 type: 'Tombstone'
