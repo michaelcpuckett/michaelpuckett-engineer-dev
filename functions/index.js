@@ -14,7 +14,7 @@ firebaseAdmin.initializeApp(firebaseConfig);
 
 const ACTIVITYSTREAMS_CONTEXT = 'https://www.w3.org/ns/activitystreams';
 const CONTENT_TYPE_HEADER = `application/ld+json; profile="${ACTIVITYSTREAMS_CONTEXT}"`;
-const OK_MESSAGE = {
+const BLANK_RESPONSE = {
     "@context": ACTIVITYSTREAMS_CONTEXT
 };
 const PUBLIC_ACTOR = 'https://www.w3.org/ns/activitystreams#Public';
@@ -132,7 +132,7 @@ const handleInboxPostRequest = async (req, res) => {
             res
                 .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                 .status(200)
-                .send(OK_MESSAGE);
+                .send(BLANK_RESPONSE);
         } else if (type === 'Undo' && object.type === 'Follow') {
             console.log('Undo Follow....');
             console.log(data);
@@ -148,7 +148,7 @@ const handleInboxPostRequest = async (req, res) => {
                 res
                     .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                     .status(200)
-                    .send(OK_MESSAGE);
+                    .send(BLANK_RESPONSE);
             });
         } else if (type === 'Delete') {
             firebaseAdmin.database().ref('/as/inbox').once('value').then(snapshot => {
@@ -162,7 +162,7 @@ const handleInboxPostRequest = async (req, res) => {
                 res
                     .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                     .status(200)
-                    .send(OK_MESSAGE);
+                    .send(BLANK_RESPONSE);
             });
         } else if (type === 'Create') {
             firebaseAdmin.database().ref(`/as/inbox/${Date.now()}`).set(object);
@@ -170,26 +170,26 @@ const handleInboxPostRequest = async (req, res) => {
             res
                 .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                 .status(200)
-                .send(OK_MESSAGE);
+                .send(BLANK_RESPONSE);
         } else if (type === 'Like') {
             firebaseAdmin.database().ref(`/as/inbox/${Date.now()}`).set(data);
 
             res
                 .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                 .status(200)
-                .send(OK_MESSAGE);
+                .send(BLANK_RESPONSE);
         } else if (type === 'Accept') {
             console.log('ACCEPT...');
             res  
                 .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                 .status(200)
-                .send(OK_MESSAGE);
+                .send(BLANK_RESPONSE);
         } else {
             console.log('OTHER...');
             res
                 .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                 .status(200)
-                .send(OK_MESSAGE);
+                .send(BLANK_RESPONSE);
         }
     } catch (error) {
         console.log({error});
@@ -197,7 +197,7 @@ const handleInboxPostRequest = async (req, res) => {
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
             .status(200)
-            .send(OK_MESSAGE);
+            .send(BLANK_RESPONSE);
     }
 };
 
@@ -335,6 +335,17 @@ app.get('/as/outbox', handleOutboxGetRequest);
 app.get('/as/followers', handleFollowersGetRequest);
 app.get('/as/following', handleFollowingGetRequest);
 app.get('/as/likes', handleLikesGetRequest);
+app.get('/as/notes/:id', (req, res) => {
+    firebaseAdmin.database().ref('/as/outbox').once('value').then(snapshot => {
+        const value = (snapshot.exists() ? snapshot.val() : null) || {};
+        const [, object] = Object.entries(value).find(([, child]) => child.id === `${localDomain}/as/notes/${req.params.id}`) || [];
+
+        res
+            .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+            .status(object ? 200 : 404)
+            .send(object || BLANK_RESPONSE);
+    });
+});
 app.post('/as/admin/follow', async (req, res) => {
     const foreignActor = req.body.actor;
 
@@ -359,7 +370,7 @@ app.post('/as/admin/follow', async (req, res) => {
     res
         .setHeader('Content-Type', CONTENT_TYPE_HEADER)
         .status(200)
-        .send(OK_MESSAGE);
+        .send(BLANK_RESPONSE);
 });
 app.post('/as/admin/like', async (req, res) => {
     const foreignActor = req.body.actor;
@@ -382,7 +393,7 @@ app.post('/as/admin/like', async (req, res) => {
     res
         .setHeader('Content-Type', CONTENT_TYPE_HEADER)
         .status(200)
-        .send(OK_MESSAGE);
+        .send(BLANK_RESPONSE);
 });
 app.post('/as/admin/create', (req, res) => {
     firebaseAdmin.database().ref('/as/followers').limitToLast(100).once('value').then(snapshot => {
@@ -427,7 +438,7 @@ app.post('/as/admin/create', (req, res) => {
             res
                 .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                 .status(200)
-                .send(OK_MESSAGE);
+                .send(BLANK_RESPONSE);
         });
     });
 });
@@ -472,13 +483,13 @@ app.post('/as/admin/delete', (req, res) => {
                     res
                         .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                         .status(200)
-                        .send(OK_MESSAGE);
+                        .send(BLANK_RESPONSE);
                 });
             } else {
                 res
                     .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                     .status(404)
-                    .send(OK_MESSAGE);
+                    .send(BLANK_RESPONSE);
             }
         });
     });
@@ -514,7 +525,7 @@ app.post('/as/admin/message', async (req, res) => {
     res
         .setHeader('Content-Type', CONTENT_TYPE_HEADER)
         .status(200)
-        .send(OK_MESSAGE);
+        .send(BLANK_RESPONSE);
 });
 app.get('/as/admin/messages', async (req, res) => {
     

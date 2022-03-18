@@ -89,7 +89,7 @@
                                 }
                             </style>
                             ${this.feedItem?.type === 'Note' ? `
-                                ${this.feedItem.attributedTo === localActor ? '' : `
+                                ${this.feedItem.attributedTo === localActor ? '<p>(<strong>You</strong>)</p>' : `
                                      ${avatar ? `<img width="80" style="float:left; margin-right: 10px" src="${avatar}">` : ''}
                                     <p><strong>${preferredUsername}</strong></p>
                                 `}
@@ -114,13 +114,32 @@
                                 `)}
                             ` : ''}
                             ${this.feedItem?.type === 'Like' ? `
-                                ${this.feedItem.actor === localActor ? '' : `
+                                ${this.feedItem.actor === localActor ? `
+                                    <p><strong>You</strong> liked</p>    
+                                ` : `
                                     <p><strong>${preferredUsername}</strong> liked</p>
                                 `}
-                                <p>${this.feedItem.object}</p>
+                                <div data-embed-id="${this.feedItem?.object}"></div>
                             ` : ''}
                         `;
                         this.shadowRoot.append(rootDivElement);
+                        const embedElement = this.shadowRoot.querySelector('div[data-embed-id]');
+                        
+                        if (embedElement) {
+                            fetch(embedElement.dataset.embedId)
+                                .then(response => response.json())
+                                .then((data) => {
+                                    if (data.type === 'Tombstone') {
+                                        const descriptionElement = window.document.createElement('span');
+                                        descriptionElement.textContent = '<DEAD>';
+                                        embedElement.append(descriptionElement);
+                                    } else {
+                                        const feedItemElement = window.document.createElement('feed-item');
+                                        feedItemElement.feedItem = data;
+                                        embedElement.append(feedItemElement);
+                                    }
+                                });
+                        }
                     }
                 });
                 window.customElements.define('actor-summary', class extends HTMLElement {

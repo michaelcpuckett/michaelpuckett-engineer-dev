@@ -39,6 +39,9 @@
     }, {
       "source": "as/admin/follow",
       "function": "as"
+    }, {
+      "source": "as/notes/**",
+      "function": "as"
     }],
     "headers": [{
       "source": "public/as/actor",
