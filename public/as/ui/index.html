@@ -52,11 +52,30 @@
             ;(async () => {
                 const localActor = 'https://michaelpuckett.engineer/as/actor';
 
-                const likes = await fetch('/as/likes')
-                    .then(response => response.json())
-                    .then(data => {
-                        return data.first.orderedItems;
-                    });
+                const [likes,followers,following] = await Promise.all([
+                    fetch('/as/likes')
+                        .then(response => response.json())
+                        .then(data => {
+                            return data.first.orderedItems;
+                        }),
+                    fetch('/as/followers', {
+                        headers: {
+                            'Accept-Profile': 'http://www.w3.org/ns/json-ld#expanded'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            return data.first.orderedItems;
+                        }),
+                    fetch('/as/following', {
+                        headers: {
+                            'Accept-Profile': 'http://www.w3.org/ns/json-ld#expanded'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            return data.first.orderedItems;
+                        })]);
                 
                 window.customElements.define('feed-item', class extends HTMLElement {
                     constructor() {
@@ -69,6 +88,8 @@
                             rootDivElement.classList.add('feed-item');
                             rootDivElement.classList.add(`feed-item--${this.feedItem.type}`);
                         }
+                        const foreignActor = following.find(actor => actor.id === (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor))?.preferredUsername ?? (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor);
+
                         rootDivElement.innerHTML = `
                             <style>
                                 .feed-item {
@@ -79,7 +100,7 @@
                             </style>
                             ${this.feedItem?.type === 'Note' ? `
                                 ${this.feedItem.attributedTo === localActor ? '' : `
-                                    <p><strong>${this.feedItem.attributedTo}</strong></p>
+                                    <p><strong>${foreignActor}</strong></p>
                                 `}
                                 <p>${this.feedItem.content}</p>
                                 ${(this.feedItem.attributedTo === localActor ? '' : ((likes.indexOf(this.feedItem.id) > -1)) ? `
@@ -98,7 +119,7 @@
                             ` : ''}
                             ${this.feedItem?.type === 'Like' ? `
                                 ${this.feedItem.actor === localActor ? '' : `
-                                    <p><strong>${this.feedItem.actor}</strong> liked</p>
+                                    <p><strong>${foreignActor}</strong> liked</p>
                                 `}
                                 <p>${this.feedItem.object}</p>
                             ` : ''}

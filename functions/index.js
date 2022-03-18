@@ -111,8 +111,20 @@ const handleInboxPostRequest = async (req, res) => {
 
             await sendAcceptMessage(foreignActor, data);
 
+            const foreignActorExpanded = await fetch(foreignActor, {
+                method: 'get',
+                headers: {
+                    'Content-Type': CONTENT_TYPE_HEADER,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async (response) => {
+                return await response.json();
+            });
+
             // record response
             firebaseAdmin.database().ref(`/as/followers/${Date.now()}`).set({
+                ...foreignActorExpanded,
                 id: foreignActor
             });
 
@@ -241,7 +253,7 @@ const handleOutboxGetRequest = (req, res) => {
 const handleFollowersGetRequest = (req, res) => {
     firebaseAdmin.database().ref('/as/followers').limitToLast(100).once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
-        const followers = Object.values(value).map(child => child.id).reverse();
+        const followers = Object.values(value).map(child => (req.get('Accept-Profile') && req.get('Accept-Profile').includes('http://www.w3.org/ns/json-ld#expanded')) ? child : child.id).reverse();
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
@@ -265,7 +277,7 @@ const handleFollowersGetRequest = (req, res) => {
 const handleFollowingGetRequest = (req, res) => {
     firebaseAdmin.database().ref('/as/following').limitToLast(100).once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
-        const following = Object.values(value).map(child => child.id).reverse();
+        const following = Object.values(value).map(child => (req.get('Accept-Profile') && req.get('Accept-Profile').includes('http://www.w3.org/ns/json-ld#expanded')) ? child : child.id).reverse();
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
@@ -321,7 +333,19 @@ app.post('/as/admin/follow', async (req, res) => {
 
     await sendFollowMessage(foreignActor);
 
+    const foreignActorExpanded = await fetch(foreignActor, {
+        method: 'get',
+        headers: {
+            'Content-Type': CONTENT_TYPE_HEADER,
+            'Accept': 'application/json'
+        }
+    })
+    .then(async (response) => {
+        return await response.json();
+    });
+
     firebaseAdmin.database().ref(`/as/following/${Date.now()}`).set({
+        ...foreignActorExpanded,
         id: foreignActor
     });
     
