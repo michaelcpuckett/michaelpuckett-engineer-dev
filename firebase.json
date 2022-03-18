@@ -28,6 +28,9 @@
       "source": "as/admin/create",
       "function": "as"
     }, {
+      "source": "as/admin/delete",
+      "function": "as"
+    }, {
       "source": "/as/admin/message",
       "function": "as"
     }, {

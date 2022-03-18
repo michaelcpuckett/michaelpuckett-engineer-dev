@@ -150,6 +150,20 @@ const handleInboxPostRequest = async (req, res) => {
                     .status(200)
                     .send(OK_MESSAGE);
             });
+        } else if (type === 'Delete') {
+            firebaseAdmin.database().ref('/as/inbox').once('value').then(snapshot => {
+                const value = (snapshot.exists() ? snapshot.val() : null) || {};
+                const [timestamp] = Object.entries(value).find(([, child]) => child.id === object.id);
+
+                if (timestamp) {
+                    firebaseAdmin.database().ref(`/as/inbox/${timestamp}`).set(object);
+                }
+            
+                res
+                    .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+                    .status(200)
+                    .send(OK_MESSAGE);
+            });
         } else if (type === 'Create') {
             firebaseAdmin.database().ref(`/as/inbox/${Date.now()}`).set(object);
 
@@ -422,6 +436,58 @@ app.post('/as/admin/create', (req, res) => {
                 .setHeader('Content-Type', CONTENT_TYPE_HEADER)
                 .status(200)
                 .send(OK_MESSAGE);
+        });
+    });
+});
+app.post('/as/admin/delete', (req, res) => {
+    firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
+        const followersValue = (snapshot.exists() ? snapshot.val() : null) || {};
+        const followers = Object.values(followersValue).map(child => child.id).reverse();
+        const guid = crypto.randomBytes(16).toString('hex');
+
+        firebaseAdmin.database().ref('/as/outbox').once('value').then(snapshot => {
+            const value = (snapshot.exists() ? snapshot.val() : null) || {};
+            const [timestamp, object] = Object.entries(value).find(([, child]) => child.id === req.body.id);
+
+            if (timestamp) {
+                const date = new Date().toUTCString();
+                const tombstone = {
+                    id: object.id,
+                    type: 'Tombstone',
+                    published: object.published || date,
+                    updated: date,
+                    deleted: date
+                };
+                firebaseAdmin.database().ref(`/as/outbox/${timestamp}`).set(tombstone);
+
+                const message = {
+                    "@context": ACTIVITYSTREAMS_CONTEXT,
+                    id: `${localDomain}/as/${guid}`,
+                    type: "Delete",
+                    actor: localActor,
+                    object: tombstone
+                };
+            
+                firebaseAdmin.database().ref(`/as/outbox/${Date.now()}`).set(tombstone);
+
+                const signAndSendPromises = [];
+
+                for (const foreignActor of followers) {
+                    signAndSendPromises.push(signAndSendToForeignActorInbox(foreignActor, message));
+                }
+
+                Promise.all(signAndSendPromises).then(() => {
+                    res
+                        .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+                        .status(200)
+                        .send(OK_MESSAGE);
+                });
+            } else {
+                res
+                    .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+                    .status(404)
+                    .send(OK_MESSAGE);
+            }
         });
     });
 });

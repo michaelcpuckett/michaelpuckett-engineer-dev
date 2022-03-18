@@ -87,7 +87,12 @@
                                     <p><strong>${preferredUsername}</strong></p>
                                 `}
                                 <p>${this.feedItem.content}</p>
-                                ${(this.feedItem.attributedTo === localActor ? '' : ((likes.indexOf(this.feedItem.id) > -1)) ? `
+                                ${(this.feedItem.attributedTo === localActor ? `
+                                    <form method="POST" action="/as/admin/delete">
+                                        <input type="hidden" name="id" value="${this.feedItem.id}">
+                                        <button>Delete</button>
+                                    </form>    
+                                ` : ((likes.indexOf(this.feedItem.id) > -1)) ? `
                                     <form method="POST" action="/as/admin/undo">
                                         <input type="hidden" name="id" value="${this.feedItem.id}">
                                         <input type="hidden" name="actor" value="${this.feedItem.attributedTo}">
