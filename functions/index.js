@@ -515,6 +515,64 @@ app.post('/as/admin/undo-like', async (req, res) => {
         }
     });
 });
+app.post('/as/admin/unfollow', async (req, res) => {
+    const id = req.body.id;
+
+    firebaseAdmin.database().ref('/as/following').once('value').then(async snapshot => {
+        const value = (snapshot.exists() ? snapshot.val() : null) || {};
+        const [timestamp, followee] = Object.entries(value).find(([, child]) => child.id === id) || [];
+
+        if (!timestamp) {
+            res
+                .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+                .status(404)
+                .send(BLANK_RESPONSE);
+        } else {
+            const foreignActor = followee.id;
+            const guid = crypto.randomBytes(16).toString('hex');
+
+            firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
+                const value = (snapshot.exists() ? snapshot.val() : null) || {};
+                const followers = Object.values(value).map(child => child.id).reverse();
+
+                const message = {
+                    "@context": ACTIVITYSTREAMS_CONTEXT,
+                    id: `${localDomain}/as/${guid}`,
+                    type: "Undo",
+                    actor: localActor,
+                    object: {
+                        "type": "Follow",
+                        actor: localActor,
+                        object: foreignActor
+                    },
+                    cc: [
+                        `${localDomain}/as/followers`,
+                        foreignActor
+                    ],
+                    to: [
+                        PUBLIC_ACTOR
+                    ],
+                    published: new Date().toUTCString()
+                };
+                
+                firebaseAdmin.database().ref(`/as/following/${timestamp}`).set(null);
+
+                const signAndSendPromises = [];
+
+                for (const actor of [...new Set([foreignActor, ...followers])]) {
+                    signAndSendPromises.push(signAndSendToForeignActorInbox(actor, message));
+                }
+
+                Promise.all(signAndSendPromises).then(() => {
+                    res
+                        .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+                        .status(200)
+                        .send(BLANK_RESPONSE);
+                });
+            });
+        }
+    });
+});
 app.post('/as/admin/create', (req, res) => {
     firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};

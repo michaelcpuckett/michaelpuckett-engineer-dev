@@ -43,6 +43,9 @@
       "source": "as/admin/follow",
       "function": "as"
     }, {
+      "source": "as/admin/unfollow",
+      "function": "as"
+    }, {
       "source": "as/notes/**",
       "function": "as"
     }],
