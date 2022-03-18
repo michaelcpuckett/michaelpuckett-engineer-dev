@@ -131,13 +131,14 @@ const handleInboxPostRequest = async (req, res) => {
 
             res
                 .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+                .setHeader('Access-Control-Allow-Origin', '*')
                 .status(200)
                 .send(BLANK_RESPONSE);
         } else if (type === 'Undo' && object.type === 'Follow') {
             console.log('Undo Follow....');
             console.log(data);
             
-            firebaseAdmin.database().ref('/as/followers').limitToLast(100).once('value').then(snapshot => {
+            firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
                 const value = (snapshot.exists() ? snapshot.val() : null) || {};
                 const [timestamp] = Object.entries(value).find(([, child]) => child.id === foreignActor);
 
@@ -212,10 +213,11 @@ const handleInboxGetRequest = (req, res) => {
     
     firebaseAdmin.database().ref('/as/inbox').limitToLast(100).once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
-        const inbox = Object.values(value).reverse();
+        const inbox = Object.values(value).reverse().filter(message => message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)));
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+            .setHeader('Access-Control-Allow-Origin', '*')
             .status(200)
             .send({
                 "@context": ACTIVITYSTREAMS_CONTEXT,
@@ -227,7 +229,7 @@ const handleInboxGetRequest = (req, res) => {
                     "type": "OrderedCollectionPage",
                     "totalItems": inbox.length,
                     "partOf": `${localDomain}/as/inbox`,
-                    "orderedItems": inbox.filter(message => message.type !== 'Like' && message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)))
+                    "orderedItems": inbox
                 }
             });
     });
@@ -236,10 +238,11 @@ const handleInboxGetRequest = (req, res) => {
 const handleOutboxGetRequest = (req, res) => {
     firebaseAdmin.database().ref('/as/outbox').limitToLast(100).once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
-        const outbox = Object.values(value).reverse();
+        const outbox = Object.values(value).reverse().filter(message => message.type !== 'Like' && message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)));
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+            .setHeader('Access-Control-Allow-Origin', '*')
             .status(200)
             .send({
                 "@context": ACTIVITYSTREAMS_CONTEXT,
@@ -251,19 +254,21 @@ const handleOutboxGetRequest = (req, res) => {
                     "type": "OrderedCollectionPage",
                     "totalItems": outbox.length,
                     "partOf": `${localDomain}/as/outbox`,
-                    "orderedItems": outbox.filter(message => message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)))
+                    "orderedItems": outbox
                 }
             });
     });
 };
 
 const handleFollowersGetRequest = (req, res) => {
-    firebaseAdmin.database().ref('/as/followers').limitToLast(100).once('value').then(snapshot => {
+    firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
-        const followers = Object.values(value).map(child => (req.get('Accept-Profile') && req.get('Accept-Profile').includes('http://www.w3.org/ns/json-ld#expanded')) ? child : child.id).reverse();
+        const isExpanded = req.get('Accept-Profile') && req.get('Accept-Profile').includes('http://www.w3.org/ns/json-ld#expanded');
+        const followers = Object.values(value).reverse().map(child => isExpanded ? child : child.id);
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+            .setHeader('Access-Control-Allow-Origin', '*')
             .status(200)
             .send({
                 "@context": ACTIVITYSTREAMS_CONTEXT,
@@ -284,10 +289,12 @@ const handleFollowersGetRequest = (req, res) => {
 const handleFollowingGetRequest = (req, res) => {
     firebaseAdmin.database().ref('/as/following').limitToLast(100).once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
-        const following = Object.values(value).map(child => (req.get('Accept-Profile') && req.get('Accept-Profile').includes('http://www.w3.org/ns/json-ld#expanded')) ? child : child.id).reverse();
+        const isExpanded = req.get('Accept-Profile') && req.get('Accept-Profile').includes('http://www.w3.org/ns/json-ld#expanded');
+        const following = Object.values(value).reverse().map(child => isExpanded ? child : child.id);
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+            .setHeader('Access-Control-Allow-Origin', '*')
             .status(200)
             .send({
                 "@context": ACTIVITYSTREAMS_CONTEXT,
@@ -306,12 +313,26 @@ const handleFollowingGetRequest = (req, res) => {
 };
 
 const handleLikesGetRequest = (req, res) => {
-    firebaseAdmin.database().ref('/as/likes').limitToLast(100).once('value').then(snapshot => {
+    firebaseAdmin.database().ref('/as/likes').limitToLast(100).once('value').then(async snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
-        const likes = Object.values(value).map(child => child.id).reverse();
+        const isExpanded = req.get('Accept-Profile') && req.get('Accept-Profile').includes('http://www.w3.org/ns/json-ld#expanded');
+        const likePromises = Object.values(value).reverse().map(async child => isExpanded ? {
+            ...child,
+            object: await fetch(child.object, {
+                headers: {
+                    'Content-Type': CONTENT_TYPE_HEADER,
+                    'Accept': 'application/json'
+                }
+            }).then(response => response.json()).catch(() => ({
+                id: child.object,
+                type: 'Tombstone'
+            }))
+        } : child.id);
+        const likes = await Promise.all(likePromises);
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+            .setHeader('Access-Control-Allow-Origin', '*')
             .status(200)
             .send({
                 "@context": ACTIVITYSTREAMS_CONTEXT,
@@ -342,6 +363,7 @@ app.get('/as/notes/:id', (req, res) => {
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+            .setHeader('Access-Control-Allow-Origin', '*')
             .status(object ? 200 : 404)
             .send(object || BLANK_RESPONSE);
     });
@@ -375,28 +397,44 @@ app.post('/as/admin/follow', async (req, res) => {
 app.post('/as/admin/like', async (req, res) => {
     const foreignActor = req.body.actor;
     const guid = crypto.randomBytes(16).toString('hex');
+    firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
+        const value = (snapshot.exists() ? snapshot.val() : null) || {};
+        const followers = Object.values(value).map(child => child.id).reverse();
 
-    const message = {
-        "@context": ACTIVITYSTREAMS_CONTEXT,
-        id: `${localDomain}/as/${guid}`,
-        type: "Like",
-        actor: localActor,
-        object: req.body.id
-    };
-    
-    firebaseAdmin.database().ref(`/as/likes/${Date.now()}`).set({
-        id: message.object
+        const message = {
+            "@context": ACTIVITYSTREAMS_CONTEXT,
+            id: `${localDomain}/as/${guid}`,
+            type: "Like",
+            actor: localActor,
+            object: req.body.id,
+            cc: [
+                `${localDomain}/as/followers`,
+                foreignActor
+            ],
+            to: [
+                PUBLIC_ACTOR
+            ],
+            published: new Date().toUTCString()
+        };
+        
+        firebaseAdmin.database().ref(`/as/likes/${Date.now()}`).set(message);
+
+        const signAndSendPromises = [];
+
+        for (const actor of [...new Set([foreignActor, ...followers])]) {
+            signAndSendPromises.push(signAndSendToForeignActorInbox(actor, message));
+        }
+
+        Promise.all(signAndSendPromises).then(() => {
+            res
+                .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+                .status(200)
+                .send(BLANK_RESPONSE);
+        });
     });
-
-    await signAndSendToForeignActorInbox(foreignActor, message);
-
-    res
-        .setHeader('Content-Type', CONTENT_TYPE_HEADER)
-        .status(200)
-        .send(BLANK_RESPONSE);
 });
 app.post('/as/admin/create', (req, res) => {
-    firebaseAdmin.database().ref('/as/followers').limitToLast(100).once('value').then(snapshot => {
+    firebaseAdmin.database().ref('/as/followers').once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
         const followers = Object.values(value).map(child => child.id).reverse();
         const guid = crypto.randomBytes(16).toString('hex');
@@ -547,6 +585,7 @@ app.get('/as/admin/messages', async (req, res) => {
 
     res
         .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+        .setHeader('Access-Control-Allow-Origin', '*')
         .status(200)
         .send({
             "@context": ACTIVITYSTREAMS_CONTEXT,

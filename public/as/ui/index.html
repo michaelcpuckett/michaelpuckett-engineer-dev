@@ -56,7 +56,7 @@
             </section>
         </main>
         <script type="module">
-            ;(async () => {
+            (async () => {
                 const localActor = 'https://michaelpuckett.engineer/as/actor';
                 
                 window.customElements.define('feed-item', class extends HTMLElement {
@@ -99,7 +99,7 @@
                                         <input type="hidden" name="id" value="${this.feedItem.id}">
                                         <button>Delete</button>
                                     </form>    
-                                ` : ((likes.indexOf(this.feedItem.id) > -1)) ? `
+                                ` : ((likes.findIndex(like => like.object.id === this.feedItem.id) > -1)) ? `
                                     <form method="POST" action="/as/admin/undo">
                                         <input type="hidden" name="id" value="${this.feedItem.id}">
                                         <input type="hidden" name="actor" value="${this.feedItem.attributedTo}">
@@ -119,26 +119,20 @@
                                 ` : `
                                     <p><strong>${preferredUsername}</strong> liked</p>
                                 `}
-                                <div data-embed-id="${this.feedItem?.object}"></div>
+                                <div data-embed></div>
                             ` : ''}
                         `;
                         this.shadowRoot.append(rootDivElement);
-                        const embedElement = this.shadowRoot.querySelector('div[data-embed-id]');
+                        const embedElement = this.shadowRoot.querySelector('div[data-embed]');
                         
                         if (embedElement) {
-                            fetch(embedElement.dataset.embedId)
-                                .then(response => response.json())
-                                .then((data) => {
-                                    if (data.type === 'Tombstone') {
-                                        const descriptionElement = window.document.createElement('span');
-                                        descriptionElement.textContent = '<DEAD>';
-                                        embedElement.append(descriptionElement);
-                                    } else {
-                                        const feedItemElement = window.document.createElement('feed-item');
-                                        feedItemElement.feedItem = data;
-                                        embedElement.append(feedItemElement);
-                                    }
-                                });
+                            if (this.feedItem.object?.type === 'Tombstone') {
+                                this.remove();
+                            } else {
+                                const feedItemElement = window.document.createElement('feed-item');
+                                feedItemElement.feedItem = this.feedItem.object;
+                                embedElement.append(feedItemElement);
+                            }
                         }
                     }
                 });
@@ -194,23 +188,28 @@
                         }
                     });
                 };
-                const getOutbox = async () => {
+                const getOutbox = async (likes) => {
                     await fetch('/as/outbox')
-                    .then(response => response.json())
-                    .then(data => {
-                        const feedItems = data.first.orderedItems;
-                        const containerElement = window.document.querySelector('#outbox');
+                        .then(response => response.json())
+                        .then(data => {
+                            const feedItems = data.first.orderedItems;
+                            const containerElement = window.document.querySelector('#outbox');
+                            const likesAndPosts = [...likes, ...feedItems].sort((a, b) => new Date(a.published) - new Date(b.published));
 
-                        for (const feedItem of feedItems) {
-                            const feedItemElement = window.document.createElement('feed-item');
-                            feedItemElement.feedItem = feedItem;
-                            containerElement.append(feedItemElement);
-                        }
-                    });
+                            for (const feedItem of likesAndPosts) {
+                                const feedItemElement = window.document.createElement('feed-item');
+                                feedItemElement.feedItem = feedItem;
+                                containerElement.append(feedItemElement);
+                            }
+                        });
                 };
                 
                 const [likes, followers,following, messages] = await Promise.all([
-                    fetch('/as/likes')
+                    fetch('/as/likes', {
+                        headers: {
+                            'Accept-Profile': 'http://www.w3.org/ns/json-ld#expanded'
+                        }
+                    })
                         .then(response => response.json())
                         .then(data => {
                             return data.first.orderedItems;
@@ -239,6 +238,10 @@
                             return data.first.orderedItems;
                         }),
                 ]);
+
+                console.log({
+                    likes
+                });
                 
                 {
                     const containerElement = window.document.querySelector('#followers');
@@ -258,9 +261,8 @@
                     window.document.querySelector(`actor-summary[data-actor="${actor}"]`)?.append(feedItemElement);
                 }
 
-                Promise.all([getInbox(), getOutbox()]);
+                Promise.all([getInbox(), getOutbox(likes)]);
             })();
-
         </script>
     </body>
 </html>
