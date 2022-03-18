@@ -70,7 +70,11 @@
                             rootDivElement.classList.add('feed-item');
                             rootDivElement.classList.add(`feed-item--${this.feedItem.type}`);
                         }
-                        const { preferredUsername, icon } = following.find(actor => actor.id === (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor)) ?? (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor);
+                        let {
+                            preferredUsername,
+                            icon = null
+                        } = (following.find(actor => actor.id === (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor)) ?? {});
+                        preferredUsername = preferredUsername ?? (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor);
                         const avatar = icon?.url;
                         
                         rootDivElement.innerHTML = `
@@ -79,6 +83,9 @@
                                     border: 1px solid black;
                                     border-radius: 8px;
                                     padding: 12px;
+                                }
+                                .feed-item--Tombstone {
+                                    display: none;
                                 }
                             </style>
                             ${this.feedItem?.type === 'Note' ? `
@@ -108,7 +115,7 @@
                             ` : ''}
                             ${this.feedItem?.type === 'Like' ? `
                                 ${this.feedItem.actor === localActor ? '' : `
-                                    <p><strong>${foreignActor}</strong> liked</p>
+                                    <p><strong>${preferredUsername}</strong> liked</p>
                                 `}
                                 <p>${this.feedItem.object}</p>
                             ` : ''}
@@ -156,9 +163,10 @@
                     await fetch('/as/inbox')
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
                         const feedItems = data.first.orderedItems;
                         const containerElement = window.document.querySelector('#inbox');
+
+                        console.log(data);
 
                         for (const feedItem of feedItems) {
                             const feedItemElement = window.document.createElement('feed-item');
@@ -171,7 +179,6 @@
                     await fetch('/as/outbox')
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
                         const feedItems = data.first.orderedItems;
                         const containerElement = window.document.querySelector('#outbox');
 
@@ -183,7 +190,7 @@
                     });
                 };
                 
-                const [likes,followers,following, messages] = await Promise.all([
+                const [likes, followers,following, messages] = await Promise.all([
                     fetch('/as/likes')
                         .then(response => response.json())
                         .then(data => {
@@ -225,7 +232,6 @@
                     }
                 }
 
-                console.log(messages);
                 for (const message of messages) {
                     const feedItemElement = window.document.createElement('feed-item');
                     feedItemElement.feedItem = message;

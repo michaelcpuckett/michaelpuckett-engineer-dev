@@ -227,21 +227,13 @@ const handleInboxGetRequest = (req, res) => {
                     "type": "OrderedCollectionPage",
                     "totalItems": inbox.length,
                     "partOf": `${localDomain}/as/inbox`,
-                    "orderedItems": inbox.filter(message => Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)
+                    "orderedItems": inbox.filter(message => message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)))
                 }
             });
     });
 };
 
 const handleOutboxGetRequest = (req, res) => {
-    try {
-        const data = JSON.parse(req.body.toString());
-        // record request
-        firebaseAdmin.database().ref(`/as/log/outbox/get/${Date.now()}`).set(data);
-    } catch (error) {
-        console.log(req.body);
-    }
-    
     firebaseAdmin.database().ref('/as/outbox').limitToLast(100).once('value').then(snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
         const outbox = Object.values(value).reverse();
@@ -259,7 +251,7 @@ const handleOutboxGetRequest = (req, res) => {
                     "type": "OrderedCollectionPage",
                     "totalItems": outbox.length,
                     "partOf": `${localDomain}/as/outbox`,
-                    "orderedItems": outbox.filter(message => Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)
+                    "orderedItems": outbox.filter(message => message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)))
                 }
             });
     });
