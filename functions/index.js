@@ -22,7 +22,17 @@ const app = express();
 app.use(express.json({strict: false}));
 
 const signAndSendToForeignActorInbox = async (foreignActor, message) => {
-    const foreignActorInbox = `${foreignActor}/inbox`;
+    const foreignActorInbox = await fetch(foreignActor, {
+        method: 'get',
+        headers: {
+            'Content-Type': CONTENT_TYPE_HEADER,
+            'Accept': 'application/json'
+        }
+    })
+    .then(async (response) => {
+        return (await response.json()).inbox;
+    });
+
     const foreignDomain = new URL(foreignActorInbox).hostname;
     const foreignPathName = new URL(foreignActorInbox).pathname;
 
@@ -307,7 +317,7 @@ app.get('/as/followers', handleFollowersGetRequest);
 app.get('/as/following', handleFollowingGetRequest);
 app.get('/as/likes', handleLikesGetRequest);
 app.post('/as/admin/follow', async (req, res) => {
-    const foreignActor = req.params.actor;
+    const foreignActor = req.body.actor;
 
     await sendFollowMessage(foreignActor);
 
