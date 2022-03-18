@@ -28,6 +28,12 @@
       "source": "as/admin/create",
       "function": "as"
     }, {
+      "source": "/as/admin/message",
+      "function": "as"
+    }, {
+      "source": "/as/admin/messages",
+      "function": "as"
+    }, {
       "source": "as/admin/follow",
       "function": "as"
     }],

@@ -13,14 +13,13 @@
     "name": "Michael Puckett",
 	"summary": "Creative technologist with a focus on web accessibility",
 	"url": "https://michaelpuckett.engineer",
-	"icon": [{
-		"type": "Link",
-		"href": "https://michaelpuckett.engineer/avatar.png",
+	"icon": {
+		"url": "https://michaelpuckett.engineer/avatar.png",
 		"mediaType": "image/png",
 		"name": "Avatar",
 		"width": 300,
 		"height": 300
-	}],
+	},
 	"inbox": "https://michaelpuckett.engineer/as/inbox",
 	"outbox": "https://michaelpuckett.engineer/as/outbox",
 	"followers": "https://michaelpuckett.engineer/as/followers",

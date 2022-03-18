@@ -17,6 +17,7 @@ const CONTENT_TYPE_HEADER = `application/ld+json; profile="${ACTIVITYSTREAMS_CON
 const OK_MESSAGE = {
     "@context": ACTIVITYSTREAMS_CONTEXT
 };
+const PUBLIC_ACTOR = 'https://www.w3.org/ns/activitystreams#Public';
 
 const app = express();
 app.use(express.json({strict: false}));
@@ -212,7 +213,7 @@ const handleInboxGetRequest = (req, res) => {
                     "type": "OrderedCollectionPage",
                     "totalItems": inbox.length,
                     "partOf": `${localDomain}/as/inbox`,
-                    "orderedItems": inbox
+                    "orderedItems": inbox.filter(message => Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)
                 }
             });
     });
@@ -244,7 +245,7 @@ const handleOutboxGetRequest = (req, res) => {
                     "type": "OrderedCollectionPage",
                     "totalItems": outbox.length,
                     "partOf": `${localDomain}/as/outbox`,
-                    "orderedItems": outbox
+                    "orderedItems": outbox.filter(message => Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)
                 }
             });
     });
@@ -400,7 +401,7 @@ app.post('/as/admin/create', (req, res) => {
                     `${localDomain}/as/followers`
                 ],
                 to: [
-                    "https://www.w3.org/ns/activitystreams#Public"
+                    PUBLIC_ACTOR
                 ],
                 sensitive: false,
                 attributedTo: `${localDomain}/as/actor`,
@@ -423,6 +424,74 @@ app.post('/as/admin/create', (req, res) => {
                 .send(OK_MESSAGE);
         });
     });
+});
+app.post('/as/admin/message', async (req, res) => {
+    const foreignActor = req.body.to;
+    const guid = crypto.randomBytes(16).toString('hex');
+
+    const message = {
+        "@context": ACTIVITYSTREAMS_CONTEXT,
+        id: `${localDomain}/as/${guid}`,
+        type: "Create",
+        actor: localActor,
+        object: {
+            id: `${localDomain}/as/notes/${guid}`,
+            url: `${localDomain}/messages/${guid}`,
+            type: 'Note',
+            content: req.body.content,
+            contentMap: {
+                en: req.body.content
+            },
+            to: [foreignActor],
+            sensitive: false,
+            attributedTo: `${localDomain}/as/actor`,
+            published: new Date().toUTCString()
+        }
+    };
+
+    firebaseAdmin.database().ref(`/as/outbox/${Date.now()}`).set(message.object);
+
+    await signAndSendToForeignActorInbox(foreignActor, message);
+
+    res
+        .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+        .status(200)
+        .send(OK_MESSAGE);
+});
+app.get('/as/admin/messages', async (req, res) => {
+    
+    const inbox = await firebaseAdmin.database().ref('/as/inbox').limitToLast(100).once('value').then(snapshot => {
+        return (snapshot.exists() ? snapshot.val() : null) || {};
+    });
+
+    const outbox = await firebaseAdmin.database().ref('/as/outbox').limitToLast(100).once('value').then(snapshot => {
+        return (snapshot.exists() ? snapshot.val() : null) || {};
+    });
+
+    const allMessages = {...inbox, ...outbox};
+    const messages =
+        Object.keys(allMessages)
+            .sort()
+            .reverse()
+            .map(key => allMessages[key])
+            .filter(message => Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) === -1) : message.to !== PUBLIC_ACTOR);;
+
+    res
+        .setHeader('Content-Type', CONTENT_TYPE_HEADER)
+        .status(200)
+        .send({
+            "@context": ACTIVITYSTREAMS_CONTEXT,
+            "type": "OrderedCollection",
+            "totalItems": messages.length,
+            "id": `${localDomain}/as/messages`,
+            "first": {
+                "id": `${localDomain}/as/messages?page=1`,
+                "type": "OrderedCollectionPage",
+                "totalItems": messages.length,
+                "partOf": `${localDomain}/as/messages`,
+                "orderedItems": messages
+            }
+        });
 });
 
 exports.as = functions.https.onRequest(app);

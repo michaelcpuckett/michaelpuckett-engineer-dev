@@ -16,6 +16,9 @@
                 flex-direction: column;
                 gap: 40px;
             }
+            textarea {
+                width: 100%;
+            }
         </style>
     </head>
     <body>
@@ -41,6 +44,10 @@
                 </div>
             </section>
             <section>
+                <h2>Followers</h2>
+                <div id="followers"></div>
+            </section>
+            <section>
                 <h2>Follow a User</h2>
                 <form method="POST" action="/as/admin/follow">
                     <input type="text" name="actor">
@@ -51,31 +58,6 @@
         <script type="module">
             ;(async () => {
                 const localActor = 'https://michaelpuckett.engineer/as/actor';
-
-                const [likes,followers,following] = await Promise.all([
-                    fetch('/as/likes')
-                        .then(response => response.json())
-                        .then(data => {
-                            return data.first.orderedItems;
-                        }),
-                    fetch('/as/followers', {
-                        headers: {
-                            'Accept-Profile': 'http://www.w3.org/ns/json-ld#expanded'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            return data.first.orderedItems;
-                        }),
-                    fetch('/as/following', {
-                        headers: {
-                            'Accept-Profile': 'http://www.w3.org/ns/json-ld#expanded'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            return data.first.orderedItems;
-                        })]);
                 
                 window.customElements.define('feed-item', class extends HTMLElement {
                     constructor() {
@@ -88,8 +70,9 @@
                             rootDivElement.classList.add('feed-item');
                             rootDivElement.classList.add(`feed-item--${this.feedItem.type}`);
                         }
-                        const foreignActor = following.find(actor => actor.id === (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor))?.preferredUsername ?? (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor);
-
+                        const { preferredUsername, icon } = following.find(actor => actor.id === (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor)) ?? (this.feedItem?.type === 'Note' ? this.feedItem?.attributedTo : this.feedItem?.actor);
+                        const avatar = icon?.url;
+                        
                         rootDivElement.innerHTML = `
                             <style>
                                 .feed-item {
@@ -100,7 +83,8 @@
                             </style>
                             ${this.feedItem?.type === 'Note' ? `
                                 ${this.feedItem.attributedTo === localActor ? '' : `
-                                    <p><strong>${foreignActor}</strong></p>
+                                     ${avatar ? `<img width="80" style="float:left; margin-right: 10px" src="${avatar}">` : ''}
+                                    <p><strong>${preferredUsername}</strong></p>
                                 `}
                                 <p>${this.feedItem.content}</p>
                                 ${(this.feedItem.attributedTo === localActor ? '' : ((likes.indexOf(this.feedItem.id) > -1)) ? `
@@ -123,6 +107,42 @@
                                 `}
                                 <p>${this.feedItem.object}</p>
                             ` : ''}
+                        `;
+                        this.shadowRoot.append(rootDivElement);
+                    }
+                });
+                window.customElements.define('actor-summary', class extends HTMLElement {
+                    constructor() {
+                        super();
+                        this.attachShadow({ mode: 'open' });
+                    }
+                    connectedCallback() {
+                        const rootDivElement = window.document.createElement('div');
+                        rootDivElement.classList.add('actor-summary');
+
+                        const avatar = typeof this.actor?.icon === 'string' ? this.actor.icon : this.actor?.icon?.[0]?.href;
+                        rootDivElement.innerHTML = `
+                            <style>
+                                .actor-summary {
+                                    border: 1px solid black;
+                                    border-radius: 8px;
+                                    padding: 12px;
+                                }
+                                textarea {
+                                    width: 100%;
+                                }
+                            </style>
+                            ${avatar ? `<img width="80" style="float:left; margin-right: 10px" src="${avatar}">` : ''}
+                            <h3>${this.actor?.preferredUsername}</h3>
+                            <details>
+                                <summary>Message</summary>
+                                <form method="POST" action="/as/admin/message">
+                                    <input type="hidden" name="to" value="${this.actor?.id}">
+                                    <textarea name="content"></textarea>
+                                    <button>Submit</button>
+                                </form>
+                                <slot></slot>
+                            </details>
                         `;
                         this.shadowRoot.append(rootDivElement);
                     }
@@ -157,6 +177,57 @@
                         }
                     });
                 };
+                
+                const [likes,followers,following, messages] = await Promise.all([
+                    fetch('/as/likes')
+                        .then(response => response.json())
+                        .then(data => {
+                            return data.first.orderedItems;
+                        }),
+                    fetch('/as/followers', {
+                        headers: {
+                            'Accept-Profile': 'http://www.w3.org/ns/json-ld#expanded'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            return data.first.orderedItems;
+                        }),
+                    fetch('/as/following', {
+                        headers: {
+                            'Accept-Profile': 'http://www.w3.org/ns/json-ld#expanded'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            return data.first.orderedItems;
+                        }),
+                    fetch('/as/admin/messages')
+                        .then(response => response.json())
+                        .then(data => {
+                            return data.first.orderedItems;
+                        }),
+                ]);
+                
+                {
+                    const containerElement = window.document.querySelector('#followers');
+                    
+                    for (const follower of followers) {
+                        const actorSummaryElement = window.document.createElement('actor-summary');
+                        actorSummaryElement.actor = follower;
+                        actorSummaryElement.setAttribute('data-actor', follower.id);
+                        containerElement.append(actorSummaryElement);
+                    }
+                }
+
+                console.log(messages);
+                for (const message of messages) {
+                    const feedItemElement = window.document.createElement('feed-item');
+                    feedItemElement.feedItem = message;
+                    const actor = message.attributedTo === localActor ? (Array.isArray(message.to) ? message.to[0] : message.to) : message.attributedTo;
+                    window.document.querySelector(`actor-summary[data-actor="${actor}"]`)?.append(feedItemElement);
+                }
+
                 Promise.all([getInbox(), getOutbox()]);
             })();
 
