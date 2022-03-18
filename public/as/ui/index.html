@@ -8,8 +8,12 @@
             }
             .feeds {
                 display: grid;
-                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
                 gap: 40px;
+            }
+            @media (min-width: 600px) {
+                .feeds {
+                    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                }
             }
             .feed {
                 display: flex;
@@ -17,7 +21,7 @@
                 gap: 40px;
             }
             textarea {
-                width: 100%;
+                width: 100%;)
             }
         </style>
     </head>
