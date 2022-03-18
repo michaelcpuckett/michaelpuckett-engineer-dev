@@ -227,7 +227,7 @@ const handleInboxGetRequest = (req, res) => {
                     "type": "OrderedCollectionPage",
                     "totalItems": inbox.length,
                     "partOf": `${localDomain}/as/inbox`,
-                    "orderedItems": inbox.filter(message => message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)))
+                    "orderedItems": inbox.filter(message => message.type !== 'Like' && message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)))
                 }
             });
     });
