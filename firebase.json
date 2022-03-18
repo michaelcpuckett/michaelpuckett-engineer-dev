@@ -25,6 +25,9 @@
       "source": "as/admin/like",
       "function": "as"
     }, {
+      "source": "as/admin/undo-like",
+      "function": "as"
+    }, {
       "source": "as/admin/create",
       "function": "as"
     }, {

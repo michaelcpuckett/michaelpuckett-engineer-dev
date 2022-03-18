@@ -161,6 +161,7 @@
                         });
 
                         const avatar = typeof icon === 'string' ? icon : icon?.url;
+                        const like = likes.find(like => like.object.id === this.feedItem.id);
                         
                         rootDivElement.innerHTML = `
                             <style>
@@ -202,11 +203,10 @@
                                     <form method="POST" action="/as/admin/delete">
                                         <input type="hidden" name="id" value="${this.feedItem.id}">
                                         <button>Delete</button>
-                                    </form>    
-                                ` : ((likes.findIndex(like => like.object.id === this.feedItem.id) > -1)) ? `
-                                    <form method="POST" action="/as/admin/undo">
-                                        <input type="hidden" name="id" value="${this.feedItem.id}">
-                                        <input type="hidden" name="actor" value="${this.feedItem.attributedTo}">
+                                    </form>
+                                ` : (like ? `
+                                    <form method="POST" action="/as/admin/undo-like">
+                                        <input type="hidden" name="id" value="${like.id}">
                                         <button>Undo Like</button>
                                     </form>
                                 ` : `
@@ -215,7 +215,7 @@
                                         <input type="hidden" name="actor" value="${this.feedItem.attributedTo}">
                                         <button>Like</button>
                                     </form>
-                                `)}
+                                `))}
                             ` : ''}
                             ${this.feedItem?.type === 'Like' ? `
                                 ${this.feedItem.actor === localActorId ? `
@@ -274,16 +274,23 @@
                                     width: 100%;
                                     background: white;
                                 }
-                                .columns-space-between {
+                                .columns-flex {
                                     display: flex;
                                     align-items: center;
-                                    justify-content: space-between;
-                                    width: max-content;
+                                    width: 100%;
                                 }
                             </style>
-                            <div class="columns-space-between">
+                            <div class="columns-flex">
                                 ${avatar ? `<img width="60" style="margin-right: 10px; margin-bottom: 10px; border-radius: 100%;" src="${avatar}">` : ''}
-                                <h3>${this.actor?.preferredUsername}</h3>
+                                <div class="columns-flex" style="justify-content: space-between;">
+                                    <h3>${this.actor?.preferredUsername}</h3>
+                                    ${following.find(({ id }) => id === this.actor?.id) ? `
+                                        <form method="POST" action="/as/admin/unfollow">
+                                            <input type="hidden" name="id" value="${this.actor?.id}">
+                                            <button>Unfollow</button>
+                                        </form>
+                                    ` : ''}
+                                </div>
                             </div>
                             <details open>
                                 <summary>Message</summary>
