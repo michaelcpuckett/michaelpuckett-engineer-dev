@@ -126,7 +126,7 @@
                         const embedElement = this.shadowRoot.querySelector('div[data-embed]');
                         
                         if (embedElement) {
-                            if (this.feedItem.object?.type === 'Tombstone') {
+                            if (!this.feedItem.object || this.feedItem.object?.type === 'Tombstone') {
                                 this.remove();
                             } else {
                                 const feedItemElement = window.document.createElement('feed-item');
@@ -173,7 +173,11 @@
                     }
                 });
                 const getInbox = async () => {
-                    await fetch('/as/inbox')
+                    await fetch('/as/inbox', {
+                        headers: {
+                            'Accept-Profile': 'http://www.w3.org/ns/json-ld#expanded'
+                        }
+                    })
                     .then(response => response.json())
                     .then(data => {
                         const feedItems = data.first.orderedItems;
@@ -238,10 +242,6 @@
                             return data.first.orderedItems;
                         }),
                 ]);
-
-                console.log({
-                    likes
-                });
                 
                 {
                     const containerElement = window.document.querySelector('#followers');

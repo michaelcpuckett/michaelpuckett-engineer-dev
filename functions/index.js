@@ -203,17 +203,25 @@ const handleInboxPostRequest = async (req, res) => {
 };
 
 const handleInboxGetRequest = (req, res) => {
-    try {
-        const data = JSON.parse(req.body.toString());
-        // record request
-        firebaseAdmin.database().ref(`/as/log/inbox/get/${Date.now()}`).set(data);
-    } catch (error) {
-        console.log(req.body);
-    }
-    
-    firebaseAdmin.database().ref('/as/inbox').limitToLast(100).once('value').then(snapshot => {
+    firebaseAdmin.database().ref('/as/inbox').limitToLast(100).once('value').then(async snapshot => {
         const value = (snapshot.exists() ? snapshot.val() : null) || {};
-        const inbox = Object.values(value).reverse().filter(message => message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)));
+        const isExpanded = req.get('Accept-Profile') && req.get('Accept-Profile').includes('http://www.w3.org/ns/json-ld#expanded');
+        const inboxPromises = Object.values(value).reverse().filter(message => message.type !== 'Tombstone' && (message.type !== 'Note' || (Array.isArray(message.to) ? (message.to.indexOf(PUBLIC_ACTOR) > -1) : message.to === PUBLIC_ACTOR)))
+            .map(async child => (child.type === 'Like' && isExpanded) ? {
+                ...child,
+                object: await fetch(child.object, {
+                    headers: {
+                        'Content-Type': CONTENT_TYPE_HEADER,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .catch(() => ({
+                    id: child.object,
+                    type: 'Tombstone'
+                }))
+            } : child);
+        const inbox = await Promise.all(inboxPromises);
 
         res
             .setHeader('Content-Type', CONTENT_TYPE_HEADER)
@@ -323,7 +331,9 @@ const handleLikesGetRequest = (req, res) => {
                     'Content-Type': CONTENT_TYPE_HEADER,
                     'Accept': 'application/json'
                 }
-            }).then(response => response.json()).catch(() => ({
+            })
+            .then(response => response.json())
+            .catch(() => ({
                 id: child.object,
                 type: 'Tombstone'
             }))
