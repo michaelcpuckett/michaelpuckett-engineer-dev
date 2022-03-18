@@ -216,6 +216,10 @@ const handleInboxGetRequest = (req, res) => {
                     }
                 })
                 .then(response => response.json())
+                .then(object => object.error ? {
+                    id: child.object,
+                    type: 'Tombstone',
+                } : object)
                 .catch(() => ({
                     id: child.object,
                     type: 'Tombstone'
@@ -469,8 +473,12 @@ app.post('/as/admin/undo-like', async (req, res) => {
                     }
                 })
                 .then(response => response.json())
+                .then(object => object.error ? {
+                    id: flattenedLike.object,
+                    type: 'Tombstone',
+                } : object)
                 .catch(() => ({
-                    id: child.object,
+                    id: flattenedLike.object,
                     type: 'Tombstone'
                 }))
             };
