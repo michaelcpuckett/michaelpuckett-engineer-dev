@@ -158,29 +158,31 @@ h1 {
 	align-content: stretch;
 	justify-self: flex-start;
 	font-size: 1.5rem;
-	font-size: clamp(1.25rem, 3vw, 1.5rem);
+	font-size: clamp(1.25rem, 3.25vw, 1.667rem);
 	row-gap: .5em;
 	column-gap: 1em;
 	width: 100%;
+	letter-spacing: -.05rem;
 }
 
 .sticky {
 	padding: .5em 0;
-	border-bottom: .25em solid var(--swatch-gray);
-	position: sticky;
-	top: 0;
+	border-bottom: .125em solid var(--swatch-gray);
+	/* position: sticky; */
+	/* top: 0; */
 	background-color: var(--swatch-background-color);
-	z-index: 1;
+	/* z-index: 1; */
 	display: grid;
 	grid-auto-flow: column;
 	grid-template-columns: minmax(0, 1fr) auto;
 	grid-gap: 1em;
-	cursor: pointer;
+	/* cursor: pointer; */
 	align-items: center;
 }
 
 h2 {
 	line-height: 1;
+	letter-spacing: -.025rem;
 	font-size: 2rem;
 	font-size: clamp(1.5rem, 5vw, 2rem);
 }
@@ -210,6 +212,11 @@ a:visited {
 	color: var(--swatch-interactive-completed);
 }
 
+details {
+	box-shadow: .1em .1em .1em rgba(0, 0, 0, .25);
+	border-radius: .5em;
+}
+
 details .property-description {
 	background-color: var(--swatch-button-face);
 	color: var(--swatch-button-text);
@@ -230,7 +237,9 @@ section summary {
 	box-sizing: border-box;
 	display: grid;
 	cursor: pointer;
-  list-style: none;
+  	list-style: none;
+	min-height: 5em;
+	grid-template-rows: 100%;
 }
 
 summary::marker {
@@ -255,6 +264,7 @@ details:hover summary {
 	background-color: var(--swatch-button-face);
 	border-radius: .5em;
 	padding: 1em;
+	align-content: center;
 }
 
 details[open] .item {
@@ -282,7 +292,7 @@ details[open] .item {
 		grid-template-columns: auto 1fr;
 	}
 
-	.item-inner > span:last-of-type {
+	.item-inner > span:last-of-type:not(:first-of-type) {
     text-align: right;
   }
 }
@@ -380,13 +390,12 @@ summary.link:focus,
 
 .property-name {
 	font-weight: bold;
-	letter-spacing: .5px;
+	font-size: 1.125em;
 }
 
 .person-name {
   font-size: 1.5em;
   font-weight: bold;
-	letter-spacing: .5px;
 	line-height: 1;
 }
 
@@ -453,9 +462,7 @@ header {
 			I'm a creative technologist with over 10 years of professional JavaScript experience and an educational background in graphic design.
 		</p> <p class="person-description property-description">
 			I'm a passionate advocate of digital accessibility, and I specialize in building accessible digital products and tools.
-		</p></header> <section class="section-skills"><div class="sticky"><h2>Skills</h2> <button><expansion-icon></expansion-icon> <span class="visually-hidden">
-						Expand/Collapse Skills Sections
-					</span></button></div> <ul class="unstyled-list"><li><details><summary><span role="presentation" class="skill-item item"><disclosure-triangle></disclosure-triangle> <span role="presentation" class="item-inner"><span role="presentation"><span role="presentation" class="skill-name property-name">
+		</p></header> <section class="section-skills"><div class="sticky"><h2>Skills</h2></div> <ul class="unstyled-list"><li><details><summary><span role="presentation" class="skill-item item"><disclosure-triangle></disclosure-triangle> <span role="presentation" class="item-inner"><span role="presentation"><span role="presentation" class="skill-name property-name">
               Accessibility
             </span></span> <span hidden="hidden">
             —
@@ -483,9 +490,7 @@ header {
         I have architected the development of complex brand-wide design systems, utilizing both Design Tokens and Atomic Design principles.
       </p><p>
         I have also led successful projects to define and standardize coding guidelines for large engineering teams.
-      </p></div></details></li></ul></section> <section class="section-work-experience"><div class="sticky"><h2>Experience</h2> <button><expansion-icon></expansion-icon> <span class="visually-hidden">
-					Expand/Collapse Experience Sections
-				</span></button></div> <ul class="unstyled-list"><li><details><summary><span role="presentation" class="work-item item"><disclosure-triangle></disclosure-triangle> <span role="presentation" class="item-inner"><span role="presentation" class="item-name"><span role="presentation" class="work-employer-name property-name">
+      </p></div></details></li></ul></section> <section class="section-work-experience"><div class="sticky"><h2>Experience</h2></div> <ul class="unstyled-list"><li><details><summary><span role="presentation" class="work-item item"><disclosure-triangle></disclosure-triangle> <span role="presentation" class="item-inner"><span role="presentation" class="item-name"><span role="presentation" class="work-employer-name property-name">
                 PRO Unlimited
               </span> <span class="separator">
                 —
@@ -495,7 +500,7 @@ header {
                   2021
                 </time> 
                   —
-                  <time datetime="2021" class="work-endDate property-endDate">
+                  <time datetime="2022" class="work-endDate property-endDate">
                     Present
                   </time></span></span></span></span></summary> <div class="work-description property-description"><p>
         I'm building digital experiences for the Google brand, using Lit and TypeScript.
@@ -621,9 +626,7 @@ header {
         I developed web applications for public use, such as a business licensing wizard, and assisted in managing over 10,000 informational pages.
       </p></div></details></li><!----></ul></section> <section class="section-past-projects"><div class="sticky"><h2>
 					Projects
-				</h2> <button><expansion-icon></expansion-icon> <span class="visually-hidden">
-						Expand/Collapse Projects Sections
-					</span></button></div> <ul class="unstyled-list"><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><li><details><summary><span role="presentation" class="work-item item"><disclosure-triangle></disclosure-triangle> <span role="presentation" class="item-inner"><span role="presentation" class="item-name"><span role="presentation" class="work-employer-name property-name">
+				</h2></div> <ul class="unstyled-list"><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><li><details><summary><span role="presentation" class="work-item item"><disclosure-triangle></disclosure-triangle> <span role="presentation" class="item-inner"><span role="presentation" class="item-name"><span role="presentation" class="work-employer-name property-name">
                 Rise Over Run Magazine
               </span> <span class="separator">
                 —
@@ -639,9 +642,7 @@ header {
         I started an online culture magazine that covered my local community. I built and maintained the website, produced and edited online content, art directed photo shoots, coordinated fundraising events, and managed a staff of student writers, photographers and videographers.
       </p><p>
         The magazine won the 2007 Society of Professional Journalists Mark of Excellence Award for "Best All-Around Independent Online Student Publication."
-      </p></div></details></li></ul></section> <section class="section-education"><div class="sticky"><h2>Education</h2> <button><expansion-icon></expansion-icon> <span class="visually-hidden">
-						Expand/Collapse Education Sections
-					</span></button></div> <ul class="unstyled-list"><li><details><summary><span role="presentation" class="education-item item"><disclosure-triangle></disclosure-triangle> <span role="presentation" class="item-inner"><span role="presentation" class="item-name"><span role="presentation" class="education-institution-name property-name">
+      </p></div></details></li></ul></section> <section class="section-education"><div class="sticky"><h2>Education</h2></div> <ul class="unstyled-list"><li><details><summary><span role="presentation" class="education-item item"><disclosure-triangle></disclosure-triangle> <span role="presentation" class="item-inner"><span role="presentation" class="item-name"><span role="presentation" class="education-institution-name property-name">
               Western Kentucky University
             </span> <span class="separator">
               —
@@ -689,49 +690,6 @@ header {
       const templateElement = window.document.querySelector('#template-for-disclosure-triangle');
   
       window.customElements.define('disclosure-triangle', class extends HTMLElement {
-        constructor() {
-          super();
-          this.attachShadow({ mode: 'open' });
-          this.shadowRoot.append(templateElement.content.cloneNode(true));
-        }
-      })
-    </script>
-    <template id="template-for-expansion-icon">
-      <style>
-        :host {
-          display: grid;
-          height: max-content;
-          width: max-content;
-        }
-
-        svg {
-          height: 1em;
-          width: 1em;
-          min-height: 24px;
-          min-width: 24px;
-          -webkit-user-select: none;
-          user-select: none;
-          fill: var(--swatch-interactive);
-        }
-
-        :host([open]) .plus-sign {
-          display: none;
-        }
-      </style>
-      <svg height="1" width="1" viewBox="0 0 1000 1000">
-        <g transform="translate(0,511.000000) scale(0.1,-0.1)">
-          <path d="M1026.5,4987.5c-454.3-66.3-834.6-456.8-900.9-923.9c-35.7-232.2-33.2-7723.1,2.6-7929.8c35.7-227.1,137.8-423.7,303.7-589.6c165.9-165.9,362.4-268,589.6-303.7c224.6-38.3,7730.7-38.3,7957.9-2.5c454.3,74,821.8,446.7,895.8,908.6c33.2,204.2,33.2,7728.2,0,7934.9c-35.7,219.5-178.7,497.7-326.7,627.9c-155.7,137.8-395.6,250.1-597.2,278.2C8757.2,5015.6,1217.9,5015.6,1026.5,4987.5z M8828.7,112.7v-3828.4H5000.3H1172V112.7v3828.4h3828.4h3828.4V112.7z"></path>
-          <path d="M2295,112.7v-536h2705.4h2705.4v536v536H5000.3H2295V112.7z"></path>
-          <g class="plus-sign" transform="rotate(-90 5000 100)">
-            <path d="M2295,112.7v-536h2705.4h2705.4v536v536H5000.3H2295V112.7z"></path>
-          </g>
-        </g>
-      </svg>
-    </template>
-    <script type="module">
-      const templateElement = window.document.querySelector('#template-for-expansion-icon');
-  
-      window.customElements.define('expansion-icon', class extends HTMLElement {
         constructor() {
           super();
           this.attachShadow({ mode: 'open' });
@@ -1040,17 +998,12 @@ header {
           ;[...window.document.querySelectorAll('details')].forEach((details) => {
             if (details.open) {
               details.querySelector('disclosure-triangle').setAttribute('open', '');
-              details.querySelector('expansion-icon').setAttribute('open', '');
             }
             details.addEventListener('toggle', () => {
               if (details.open) {
                 details.querySelector('disclosure-triangle').setAttribute('open', '');
-                details.closest('section').querySelector('expansion-icon').setAttribute('open', '');
               } else {
                 details.querySelector('disclosure-triangle').removeAttribute('open');
-                if (![...details.closest('section').querySelectorAll('details')].find(details => details.open)) {
-                  details.closest('section').querySelector('expansion-icon').removeAttribute('open');
-                }
               }
             });
           });
@@ -1062,17 +1015,6 @@ header {
               details.open = !details.open;
             })
           })
-        </script>
-        <script type="module">
-          ;[...window.document.querySelectorAll('.sticky')].forEach(sticky => {
-            sticky.addEventListener('click', ({ currentTarget: target }) => {
-              const detailsElements = [...target.closest('section').querySelectorAll('details')];
-              const isOpen = !!detailsElements.find(details => details.open);
-              detailsElements.forEach(details => {
-                details.open = !isOpen;
-              });
-            });
-          });
         </script>
       </body>
     </html>

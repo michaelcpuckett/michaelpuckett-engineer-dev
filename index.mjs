@@ -135,17 +135,12 @@ const prepareOutput = async ({
           ;[...window.document.querySelectorAll('details')].forEach((details) => {
             if (details.open) {
               details.querySelector('disclosure-triangle').setAttribute('open', '');
-              details.querySelector('expansion-icon').setAttribute('open', '');
             }
             details.addEventListener('toggle', () => {
               if (details.open) {
                 details.querySelector('disclosure-triangle').setAttribute('open', '');
-                details.closest('section').querySelector('expansion-icon').setAttribute('open', '');
               } else {
                 details.querySelector('disclosure-triangle').removeAttribute('open');
-                if (![...details.closest('section').querySelectorAll('details')].find(details => details.open)) {
-                  details.closest('section').querySelector('expansion-icon').removeAttribute('open');
-                }
               }
             });
           });
@@ -157,17 +152,6 @@ const prepareOutput = async ({
               details.open = !details.open;
             })
           })
-        </script>
-        <script type="module">
-          ;[...window.document.querySelectorAll('.sticky')].forEach(sticky => {
-            sticky.addEventListener('click', ({ currentTarget: target }) => {
-              const detailsElements = [...target.closest('section').querySelectorAll('details')];
-              const isOpen = !!detailsElements.find(details => details.open);
-              detailsElements.forEach(details => {
-                details.open = !isOpen;
-              });
-            });
-          });
         </script>
       </body>
     </html>

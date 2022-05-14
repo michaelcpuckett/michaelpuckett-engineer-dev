@@ -97,48 +97,5 @@
         }
       })
     </script>
-    <template id="template-for-expansion-icon">
-      <style>
-        :host {
-          display: grid;
-          height: max-content;
-          width: max-content;
-        }
-
-        svg {
-          height: 1em;
-          width: 1em;
-          min-height: 24px;
-          min-width: 24px;
-          -webkit-user-select: none;
-          user-select: none;
-          fill: var(--swatch-interactive);
-        }
-
-        :host([open]) .plus-sign {
-          display: none;
-        }
-      </style>
-      <svg height="1" width="1" viewBox="0 0 1000 1000">
-        <g transform="translate(0,511.000000) scale(0.1,-0.1)">
-          <path d="M1026.5,4987.5c-454.3-66.3-834.6-456.8-900.9-923.9c-35.7-232.2-33.2-7723.1,2.6-7929.8c35.7-227.1,137.8-423.7,303.7-589.6c165.9-165.9,362.4-268,589.6-303.7c224.6-38.3,7730.7-38.3,7957.9-2.5c454.3,74,821.8,446.7,895.8,908.6c33.2,204.2,33.2,7728.2,0,7934.9c-35.7,219.5-178.7,497.7-326.7,627.9c-155.7,137.8-395.6,250.1-597.2,278.2C8757.2,5015.6,1217.9,5015.6,1026.5,4987.5z M8828.7,112.7v-3828.4H5000.3H1172V112.7v3828.4h3828.4h3828.4V112.7z"/>
-          <path d="M2295,112.7v-536h2705.4h2705.4v536v536H5000.3H2295V112.7z"/>
-          <g class="plus-sign" transform="rotate(-90 5000 100)">
-            <path d="M2295,112.7v-536h2705.4h2705.4v536v536H5000.3H2295V112.7z" />
-          </g>
-        </g>
-      </svg>
-    </template>
-    <script type="module">
-      const templateElement = window.document.querySelector('#template-for-expansion-icon');
-  
-      window.customElements.define('expansion-icon', class extends HTMLElement {
-        constructor() {
-          super();
-          this.attachShadow({ mode: 'open' });
-          this.shadowRoot.append(templateElement.content.cloneNode(true));
-        }
-      })
-    </script>
   </body>
 </html>

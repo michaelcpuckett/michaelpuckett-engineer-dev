@@ -152,29 +152,31 @@ h1 {
 	align-content: stretch;
 	justify-self: flex-start;
 	font-size: 1.5rem;
-	font-size: clamp(1.25rem, 3vw, 1.5rem);
+	font-size: clamp(1.25rem, 3.25vw, 1.667rem);
 	row-gap: .5em;
 	column-gap: 1em;
 	width: 100%;
+	letter-spacing: -.05rem;
 }
 
 .sticky {
 	padding: .5em 0;
-	border-bottom: .25em solid var(--swatch-gray);
-	position: sticky;
-	top: 0;
+	border-bottom: .125em solid var(--swatch-gray);
+	/* position: sticky; */
+	/* top: 0; */
 	background-color: var(--swatch-background-color);
-	z-index: 1;
+	/* z-index: 1; */
 	display: grid;
 	grid-auto-flow: column;
 	grid-template-columns: minmax(0, 1fr) auto;
 	grid-gap: 1em;
-	cursor: pointer;
+	/* cursor: pointer; */
 	align-items: center;
 }
 
 h2 {
 	line-height: 1;
+	letter-spacing: -.025rem;
 	font-size: 2rem;
 	font-size: clamp(1.5rem, 5vw, 2rem);
 }
@@ -204,6 +206,11 @@ a:visited {
 	color: var(--swatch-interactive-completed);
 }
 
+details {
+	box-shadow: .1em .1em .1em rgba(0, 0, 0, .25);
+	border-radius: .5em;
+}
+
 details .property-description {
 	background-color: var(--swatch-button-face);
 	color: var(--swatch-button-text);
@@ -224,7 +231,9 @@ section summary {
 	box-sizing: border-box;
 	display: grid;
 	cursor: pointer;
-  list-style: none;
+  	list-style: none;
+	min-height: 5em;
+	grid-template-rows: 100%;
 }
 
 summary::marker {
@@ -249,6 +258,7 @@ details:hover summary {
 	background-color: var(--swatch-button-face);
 	border-radius: .5em;
 	padding: 1em;
+	align-content: center;
 }
 
 details[open] .item {
@@ -276,7 +286,7 @@ details[open] .item {
 		grid-template-columns: auto 1fr;
 	}
 
-	.item-inner > span:last-of-type {
+	.item-inner > span:last-of-type:not(:first-of-type) {
     text-align: right;
   }
 }
@@ -374,13 +384,12 @@ summary.link:focus,
 
 .property-name {
 	font-weight: bold;
-	letter-spacing: .5px;
+	font-size: 1.125em;
 }
 
 .person-name {
   font-size: 1.5em;
   font-weight: bold;
-	letter-spacing: .5px;
 	line-height: 1;
 }
 
