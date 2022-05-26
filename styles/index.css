@@ -6,10 +6,11 @@
 }
 
 :root {
-	font-family: 'Helvetica Neue', sans-serif;
+	font-family: sans-serif;
 	line-height: 1.4;
 	font-size: 100%;
 	font-size: clamp(90%, 2.5vw, 100%);
+	font: -apple-system-body;
 	--swatch-text-color: CanvasText;
 	--swatch-background-color: Canvas;
 	--swatch-gray: GrayText;
@@ -121,19 +122,17 @@ header {
 /* focus styles */
 
 :focus {
+	outline-offset: 4px;
 	outline: 4px solid var(--swatch-focused);
 }
 
 :focus-visible {
-	outline: 0;
-	border-radius: 2px;
-	box-shadow:
-		0 0 0 4px var(--swatch-focused);
+	outline-offset: 4px;
+	outline: 4px solid var(--swatch-interactive);
 }
 
 :focus:not(:focus-visible) {
 	outline: 0;
-	box-shadow: none;
 }
 
 /* headings */
@@ -157,6 +156,7 @@ h1 {
 	column-gap: 1em;
 	width: 100%;
 	letter-spacing: -.05rem;
+	font: -apple-system-headline;
 }
 
 .sticky {
@@ -178,7 +178,8 @@ h2 {
 	line-height: 1;
 	letter-spacing: -.025rem;
 	font-size: 2rem;
-	font-size: clamp(1.5rem, 5vw, 2rem);
+	font-size: clamp(1.5rem, 15vw, 2rem);
+	font: -apple-system-subheadline;
 }
 
 /* interactive items */
@@ -341,6 +342,14 @@ details .link-item {
 	width: 100%;
 }
 
+details:focus-within {
+	outline: 4px solid var(--swatch-focused);
+}
+
+summary:focus {
+	outline: 0;
+}
+
 summary.link,
 .link:any-link {
 	all: unset;
@@ -358,19 +367,13 @@ summary.link,
 
 summary.link:focus,
 .link:any-link:focus {
-	box-shadow: 0 0 0 2px var(--swatch-focused);
+	outline-offset: 4px;
+	outline: 4px solid var(--swatch-interactive);
 }
 
 summary.link:hover,
 .link:any-link:hover {
 	text-decoration: none;
-}
-
-summary.link:focus,
-.link:any-link:focus {
-	z-index: 1;
-	box-shadow:
-		0 0 0 4px var(--swatch-focused);
 }
 
 /* text styles */
@@ -382,6 +385,7 @@ summary.link:focus,
 .property-name {
 	font-weight: bold;
 	font-size: 1.125em;
+	font: -apple-system-short-headline;
 }
 
 .person-name {
